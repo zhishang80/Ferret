@@ -11,7 +11,6 @@ c_strrindex.c\
 c_strcat.c\
 c_substr.c\
 c_strfloat.c\
-cache_full_array.c\
 check_nan_data_sub.c\
 copy_buffered_window.c\
 compare_c_strings.c\
@@ -21,7 +20,6 @@ perl_read.c\
 EF_InternalUtil.c\
 fermain_c.c\
 ferret_dispatch_c.c\
-free_cached_full_array.c\
 free_c_pointer.c\
 free_c_string_array.c\
 free_dyn_mem.c\
@@ -43,8 +41,6 @@ list.c\
 nullify_mr.c\
 nullify_ws.c\
 put_frame.c\
-recover_cached_2d_array_point.c\
-recover_cached_full_array.c\
 replaceable_bad_flags.c \
 replace_bad_data_sub.c \
 save_c_string.c\

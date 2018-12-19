@@ -1,4 +1,4 @@
-/*
+        SUBROUTINE SORT_TSERIES_DSETS(nmembers, memb_order, memb_sort)
 *
 *  This software was developed by the Thermal Modeling and Analysis
 *  Project(TMAP) of the National Oceanographic and Atmospheric
@@ -30,47 +30,56 @@
 *  INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER
 *  RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF
 *  CONTRACT, NEGLIGENCE OR OTHER TORTUOUS ACTION, ARISING OUT OF OR IN
-*  CONNECTION WITH THE ACCESS, USE OR PERFORMANCE OF THIS SOFTWARE.  
+*  CONNECTION WITH THE ACCESS, USE OR PERFORMANCE OF THIS SOFTWARE. 
 *
-*/
+* NOAA/PMEL, Seattle, WA - TMAP 
 
+* sort the time steps that have been pulled from the time series members
+*
+* V698 *sh* 1/16 
 
+* calling arguments
+*   nmembers	- number of members in aggregation (input)
+*   memb_order	- ordering index of member files (output)
+*   memb_sort   - starting time steps as currently ordered, to be sorted (in/out)
 
-/*
- * cache_full_array.c
- *
- * Allocate c heap storage and copy array to it, returning pointer
- * This storage mechanism will be used for CF auxiliary coordinate arrays,
- * in order to minimize the need to re-read them 
- *
- * programmer - steve hankin
- * NOAA/PMEL, Seattle, WA - Tropical Modeling and Analysis Program
- *
- * revision 0.0 - 5/5/15
- */
+        IMPLICIT NONE
+        include 'tmap_errors.parm'
+#include "tmap_dset.parm"
+        include 'tmap_dims.parm'
+	include	'ferret.parm'
+	include 'xdset_info.cmn_text'
+	external xdset_info_data
+        include 'xprog_state.cmn'
+	include 'xtm_grid.cmn_text'  
+	include 'errmsg.parm'
+	include 'netcdf.inc'
+	include 'xvariables.cmn'
+	include 'xcontext.cmn'
+	include 'xfr_grid.cmn'
+	include 'xdiag_ctrl.cmn_text'
 
-#include <stdlib.h>
-#include "ferret.h"
-#include "FerMem.h"
- 
-void FORTRAN(cache_full_array)( double *array, int *alen, double **pointer_val)
+* calling argument declarations:
+	INTEGER nmembers, memb_order(nmembers)
+	REAL    memb_sort(nmembers)
 
-/*
-  input  - array and alen (array length)
-  output - pointer to array
-*/
+* local variable declarations:
+	INTEGER i
+	REAL    rorder(nmembers)
 
-{
-  double *ptr;
-  int i;
+* ... pre-sorted indices in a REAL array
+	DO i = 1, nmembers
+	   rorder(i) = i
+	ENDDO
 
-  ptr = (double *) FerMem_Malloc(sizeof(double) * (*alen), __FILE__, __LINE__);
+* sort the datasets by start date
+	CALL HEAP2(memb_sort, rorder, unspecified_val8, nmembers)
 
-  for (i=0; i < *alen; i++) {
-    ptr[i] = array[i];
-  }
+* Return the sort order and the total number of steps
 
-  *pointer_val = ptr;   // return the address value for ptr
+	DO i = 1, nmembers
+	   memb_order(i) = NINT(rorder(i))
+	ENDDO
 
-  return;
-}
+	RETURN
+	END

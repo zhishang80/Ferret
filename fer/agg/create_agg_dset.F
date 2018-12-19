@@ -54,7 +54,7 @@
 *   iline	- ??
 *   status	- return status (output)
 
-      IMPLICIT NONE
+        IMPLICIT NONE
         include 'tmap_errors.parm'
 #include "tmap_dset.parm"
         include 'tmap_dims.parm'
@@ -75,7 +75,7 @@
 	INTEGER		agg_dset, nsets, dset1, agg_dim, iline, status
 
 * local variable declarations:
-	INTEGER TM_LENSTR, TM_LENSTR1, ALLO_MANAGED_AXIS,
+	INTEGER TM_LENSTR, TM_LENSTR1,
      .		type, coordvar, varid, big_cx, nlen, istep
 	CHARACTER LEFINT*20, ntext*20
 	REAL	bad_flag
@@ -126,8 +126,8 @@
 * No room left for new stepfiles
        GOTO 5400
  
-* create the aggregate axis
- 100	IF (agg_dim .NE. unspecified_int4) 
+* create the ensemble aggregate axis
+  100  IF (agg_dim .EQ. e_dim) 
      .		CALL CREATE_AGG_AXIS (nsets, agg_dim, iline, status)
 	IF (status .NE. ferr_ok) GOTO 5300 
 
