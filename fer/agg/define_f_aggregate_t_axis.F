@@ -1,5 +1,6 @@
         SUBROUTINE DEFINE_F_AGGREGATE_T_AXIS(nsets, member_sets,
-     .        memb_filenames, tline, tmatch, t1indices, tdims, status)
+     .                  memb_filenames, axcalf, findices, tline,
+     .                  tmatch, t1indices, tdims, status)
 
 *  This software was developed by the Thermal Modeling and Analysis
 *  Project(TMAP) of the National Oceanographic and Atmospheric
@@ -43,6 +44,8 @@
 *       nsets          - number of forecast datasets (input)
 *       member_sets    - dataset numbers for each forecast dataset (input)
 *       memb_filenames - array of dataset filenames (input)
+*       axcalf         - time-of-forecast (F) axis used (input)
+*       findices       - index of each dataset on the time-of-forecast (F) axis (input)
 *       tline          - forecasted-times (T) axis to use/used (input/output)
 *       tmatch         - method of matching times to tline (input, can be empty);
 *                        eg, '@ASN', '@BIN', '@XACT', '@XACT:0.001'
@@ -64,8 +67,8 @@
         include 'netcdf.inc'
 
 * calling argument declarations:
-        INTEGER nsets, member_sets(nsets), tline,
-     .          t1indices(nsets), tdims(nsets), status
+        INTEGER nsets, member_sets(nsets), axcalf, findices(nsets),
+     .          tline, t1indices(nsets), tdims(nsets), status
         CHARACTER*512 memb_filenames(nsets)
         CHARACTER*(*) tmatch
 

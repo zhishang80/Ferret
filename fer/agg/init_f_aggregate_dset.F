@@ -198,7 +198,8 @@
 * datasets.  Returns the forecasted-time axis, locations of datasets
 * on that axis, and number of timesteps on that axis for each set.
         CALL DEFINE_F_AGGREGATE_T_AXIS(nsets, member_sets,
-     .   memb_filenames, axcalt, tmatch, t1indices, tdims, status)
+     .           memb_filenames, axcalf, findices, axcalt,
+     .           tmatch, t1indices, tdims, status)
         IF (status .NE. ferr_ok) GOTO 5500
 
 * Create forecast datasets corresponding to the given forecast dataset

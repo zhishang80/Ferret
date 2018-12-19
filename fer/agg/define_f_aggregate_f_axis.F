@@ -40,7 +40,7 @@
 * it from these time origins using the calendar and units of the time axis
 * of the first member.  If appropriate, sort the given datasets using the
 * time origins.  Returns the sorted datasets, time-of-forecast axis, and
-* locations of the sets on that axis.
+* locations of the datasets on that axis.
 
 * calling arguments
 *   nsets          - number of datasets given to be aggregated (input)
@@ -49,7 +49,7 @@
 *   fline          - time-of-forecast (F) axis to use/used (input/output)
 *   fmatch         - method of matching times to fline (input, can be empty);
 *                    eg, '@ASN', '@BIN', '@XACT', '@XACT:0.001'
-*   findices       - index of each time-axis-origin on the time-of-forecast (F) axis (output)
+*   findices       - index of each dataset on the time-of-forecast (F) axis (output)
 *   status         - return status (output)
 
         IMPLICIT NONE
