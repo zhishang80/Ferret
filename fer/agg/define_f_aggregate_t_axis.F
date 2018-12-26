@@ -95,7 +95,7 @@
 
         IF ( axcalt .LT. 0 ) THEN
            epsil = depsilon
-*          Be a little more relaxes about matching boundaries
+*          Be a little more relaxed about matching boundaries
            bnd_epsil = 16 * depsilon
 
 *          Get the time axis for the first member set
@@ -455,6 +455,7 @@
      .                 '" for provided T axis', *5000)
         ENDIF
 
+*       The allowed difference for an exact match (epsil) is in units of the given time axis
         IF ( tline .LT. 0 ) THEN
             epsil = depsilon
         ELSEIF ( tmatch .EQ. '@ASN' ) THEN
@@ -471,6 +472,15 @@
 *          Default is to try @XACT; if not successful, try @BIN; if not successful, use @ASN
         ELSE
            GOTO 5010
+        ENDIF
+
+        IF ( epsil .GT. 0 ) THEN
+*          Convert epsil from units of given time axis to seconds (for SECS_FROM_BC comparisons)
+           IF ( ITSA_TRUEMONTH_AXIS(axcalt) ) THEN
+              epsil = epsil * un_convert(pun_day)
+           ELSE
+              epsil = epsil * line_tunit(axcalt)
+           ENDIF
         ENDIF
 
 *       Check time coordinates from all forecast sets
@@ -549,7 +559,7 @@
                  ENDIF
                  ocoord = ocoord + origin
                  IF ( idx .EQ. 1 ) THEN
-                    IF ( TM_DFPEQ_TOL(ocoord, tcoord, epsil) ) THEN
+                    IF ( ABS(ocoord - tcoord) .LE. epsil ) THEN
 *                      First time coordinate matched
                        t1indices(setidx) = axidx
                        tdims(setidx) = line_dim(iaxis)
@@ -563,7 +573,7 @@
                     ENDIF
                  ELSE
 *                   At this time, time coordinates must be consecutive on the created/provided time axis
-                    IF ( .NOT. TM_DFPEQ_TOL(ocoord, tcoord, epsil) ) THEN
+                    IF ( ABS(ocoord - tcoord) .GT. epsil ) THEN
                        IF ( (tline .GE. 0) .AND. (tmatch .EQ. ' ') ) THEN
 *                         @XACT failed; try @BIN - any previous set assignments made with @XACT
 *                         will be the same with @BIN, so no need to exit the setidx DO loop
