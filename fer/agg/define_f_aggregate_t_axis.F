@@ -76,7 +76,7 @@
         REAL*8  GET_LINE_COORD, TM_WORLD_AX, SECS_FROM_BC,
      .          tlobnd, tcoord, thibnd, delta, origin,
      .          olobnd, ocoord, ohibnd, setorigin,
-     .          depsilon, epsil, bnd_epsil
+     .          depsilon, epsil, bnd_epsil, fcoord
         INTEGER*8 wksize
         INTEGER TM_GET_CALENDAR_ID, TM_UNITS_CAL, TM_LENSTR1,
      .          TM_FIND_LIKE_DYN_LINE,
@@ -675,26 +675,49 @@
         GOTO 1000
 
 
-*       Blindly associate the datasets in single-step increments onto the given time axis.
-  900   DO setidx = 1,nsets
+*       Associate the datasets onto the given time axis.  Do this
+*       semi-blindly: use the first time axis location later than
+*       the time-of-forecast (F) axis time for this dataset
+  900   axidx = 1
+        DO setidx = 1,nsets
+*          Get the time-of-forecast for this dataset (in units of SECS_FROM_BC)
+           fcoord = TM_WORLD_AX(findices(setidx), axcalf, BOX_MIDDLE)
+
            iaxis = ds_time_axis(member_sets(setidx))
            IF ( iaxis .LE. 0 ) THEN
-*             No time axis - assume a single time step
+*             No time axis - assume a single time step, using the next available axcalt time
 *             (ideally this should work, but may fail elsewhere)
               nsteps = 1
            ELSE
-              nsteps = line_dim(iaxis)
+*             Find the next axcalt time after the time-of-forecast for this dataset
+              DO WHILE ( axidx .LE. axlen )
+                 tcoord = TM_WORLD_AX(axidx, axcalt, BOX_MIDDLE)
+                 IF ( tcoord .GE. fcoord ) THEN
+                    GOTO 910
+                 ENDIF
+                 axidx = axidx + 1
+              ENDDO
+*             If we got here, no tcoord time found after the fcoord time
+              flen = TM_LENSTR1(memb_filenames(setidx))
+              CALL ERRMSG(ferr_aggregate_error, status,
+     .                    'incompatible forecasted-time (T) axis: '//
+     .                    'no forecasted time occurs after '//
+     .                    'the time of forecast for dataset '//
+     .                     memb_filenames(setidx)(1:flen), *5000)
+  910         nsteps = line_dim(iaxis)
            ENDIF
-           IF ( (setidx + nsteps) .GT. axlen ) THEN
-               flen = TM_LENSTR1(memb_filenames(setidx))
-               CALL ERRMSG(ferr_aggregate_error, status,
+           IF ( (axidx + nsteps - 1) .GT. axlen ) THEN
+              flen = TM_LENSTR1(memb_filenames(setidx))
+              CALL ERRMSG(ferr_aggregate_error, status,
      .                    'incompatible forecasted-time (T) axis: '//
      .                    'not enough coordinates to associate '//
      .                    'with the time axis of forecast dataset '//
      .                     memb_filenames(setidx)(1:flen), *5000)
            ENDIF
-           t1indices(setidx) = setidx
+           t1indices(setidx) = axidx
            tdims(setidx) = nsteps
+*          First forecast of next dataset starts after the first forecast of this dataset
+           axidx = axidx + 1
         ENDDO
         IF ( tmatch .EQ. ' ' )
      .     CALL WARN('Dataset time axes matched '//
