@@ -7,11 +7,11 @@ SPAWN "mkdir aggf"
 ! *** Create an artificial forecast model run collection ***
 
 ! a 20x20 lat-long region
-DEFINE AXIS/X=140E:160E:1 xax
-DEFINE AXIS/Y=20N:40N:1 yax
+DEFINE AXIS /X=140E:160E:1 xax
+DEFINE AXIS /Y=20N:40N:1 yax
 
 ! regular mid-monthly axis Jan 1950 to Dec 1960
-DEFINE AXIS/UNITS=DAYS/T0=01-JAN-1900/EDGES/T=01-JAN-1950:31-DEC-1960:`365.2425/12` monthly
+DEFINE AXIS /UNITS=DAYS /T0=01-JAN-1900 /EDGES /T=01-JAN-1950:31-DEC-1960:`365.2425/12` monthly
 
 ! beginning-of-the-month quarter-annual dates Jan 1950 to OCT 1953
 LET quarterly_dates = { \
@@ -36,8 +36,8 @@ REPEAT /NAME=fdate /RANGE=1:12 ( \
    LET tzero = quarterly_times[I=`fdate`] ;\
    LET tstart = T[gt=monthly,L=`3 * fdate - 2`] - `tzero` ;\
    LET tend = T[gt=monthly,L=`3 * fdate + 33`] - `tzero` ;\
-   DEFINE AXIS/UNIT=DAYS/T0=`t0date`/T=`tstart`:`tend`:`365.2425/12` ftaxis ;\
-   LET fcst_error = COS((final_val + `fdate`) * thirdpi) * T[gt=ftaxis] / 1000 ;\
+   DEFINE AXIS /UNIT=DAYS /T0=`t0date` /T=`tstart`:`tend`:`365.2425/12` ftaxis ;\
+   LET fcst_error = COS((final_val + `fdate`) * thirdpi) * T[gt=ftaxis] / 100 ;\
    SAVE /CLOBBER /FILE="aggf/fcst_`fdate`.nc" /L=1:24 fcst, fcst_2 ;\
    SAVE /CLOBBER /FILE="aggf/long_fcst_`fdate`.nc" fcst, fcst_2 ;\
    SAVE /CLOBBER /FILE="aggf/one_var_fcst_`fdate`.nc" /L=1:24 fcst \
