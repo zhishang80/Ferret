@@ -18,22 +18,17 @@ DEFINE DATA /AGGREGATE /HIDE /F /FAXIS=ffax testdata = 1,2,3,4
 ! using the values of quirks has a sinusoidal error that get worse with greater lead time
 !
 
-! SHOW GRID actual
-! LIST /WIDTH=600 /X=120W/Y=50N/Z=50 actual
-! SHADE /X=120W/Y=50N/Z=50 actual
-! FRAME /FILE=forecast_actual.gif
+SHOW GRID actual
+LIST /X=120W /Y=50N /Z=50 /ORDER=FT actual
+SHADE /X=120W /Y=50N /Z=50 actual
+FRAME /FILE=forecast_actual.gif
 
-! LET actualfine = actual[GT=($TF_LAG_T)@BIN,GF=($TF_CAL_F)@BIN]
-! SHOW GRID actualfine
-! LIST /WIDTH=600 /X=120W/Y=50N/Z=50 actualfine
-! SHADE /X=120W/Y=50N/Z=50 actualfine
-! FRAME /FILE=forecast_actualfine.gif
-
-LET diagview = actual
-SHOW GRID diagview
-LIST /X=120W /Y=50N /Z=50 /ORDER=FT diagview
-SHADE /X=120W /Y=50N /Z=50 diagview
-FRAME /FILE=forecast_diagview.gif
+DEFINE AXIS /UNIT="days" /T0=01-JAN-2000 /F="01-OCT-2010":"01-OCT-2011":`365.2425/12` finefax
+LET actualfine = actual[gf=finefax@XACT]
+SHOW GRID actualfine
+LIST /X=120W /Y=50N /Z=50 /ORDER=FT actualfine
+SHADE /X=120W /Y=50N /Z=50 actualfine
+FRAME /FILE=forecast_actualfine.gif
 
 ! LET leadview = actualfine[gt(TF_TIMES)=($TF_CAL_T),gf(TF_TIMES)=($TF_LAG_F)]
 ! SHOW GRID leadview
@@ -41,7 +36,7 @@ FRAME /FILE=forecast_diagview.gif
 ! SHADE /X=120W/Y=50N/Z=50 leadview
 ! FRAME /FILE=forecast_leadview.gif
 
-CANCEL VAR diagview
+CANCEL VAR actualfine
 CANCEL DATA /ALL
 CANCEL AXIS ffax
 
@@ -56,4 +51,4 @@ DEFINE DATA /AGGREGATE /HIDE /F testdata = 1,2,3,4
 
 CANCEL DATA /ALL
 
-CANCEL MOD IGNORE
+CANCEL MODE IGNORE
