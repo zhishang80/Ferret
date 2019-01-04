@@ -28,8 +28,8 @@
 *  THIS SOFTWARE IS PROVIDED BY NOAA/PMEL/TMAP "AS IS" AND ANY EXPRESS
 *  OR IMPLIED WARRANTIES, INCLUDING, BUT NOT LIMITED TO, THE IMPLIED
 *  WARRANTIES OF MERCHANTABILITY AND FITNESS FOR A PARTICULAR PURPOSE
-*  ARE DISCLAIMED. IN NO EVENT SHALL NOAA/PMEL/TMAP BE LIABLE FOR ANY SPECIAL,
-*  INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER
+*  ARE DISCLAIMED. IN NO EVENT SHALL NOAA/PMEL/TMAP BE LIABLE FOR ANY
+*  SPECIAL, INDIRECT OR CONSEQUENTIAL DAMAGES OR ANY DAMAGES WHATSOEVER
 *  RESULTING FROM LOSS OF USE, DATA OR PROFITS, WHETHER IN AN ACTION OF
 *  CONTRACT, NEGLIGENCE OR OTHER TORTUOUS ACTION, ARISING OUT OF OR IN
 *  CONNECTION WITH THE ACCESS, USE OR PERFORMANCE OF THIS SOFTWARE.
@@ -129,7 +129,8 @@
      .          max_str_len, iset, member_sets(nsets), slen, dset1,
      .          ii, nv, nvars, nuvars, iline, ref_fvar, num_indices,
      .          ignored, ref_fvars(pmaxvarsperset), axcalt, axcalf,
-     .          findices(nsets), t1indices(nsets), tdims(nsets)
+     .          findices(nsets), t1indices(nsets), tdims(nsets),
+     .          axlagf, axlagt
         LOGICAL OK_AS_AGG_VAR, ITSA_TRUEMONTH_AXIS, match
         CHARACTER*512 GET_STRING_ELEMENT_1D_X
         CHARACTER*512 memb_dsetnames(nsets), memb_filenames(nsets)
@@ -142,6 +143,8 @@
            member_sets(iset) = pdset_dummy
         ENDDO
         agg_dset = unspecified_int4
+        axlagf = unspecified_int4
+        axlagt = unspecified_int4
         axcalf = fline
         axcalt = tline
 
@@ -190,7 +193,7 @@
 * that axis.
         CALL DEFINE_F_AGGREGATE_F_AXIS(nsets, member_sets,
      .           memb_filenames, axcalf, fmatch, findices, status)
-        IF (status .NE. ferr_ok) GOTO 5500
+        IF (status .NE. ferr_ok) GOTO 5200
 
 * Assign the forecasted-time (T) axis from the time axes of the member
 * datasets.  If a T-axis to use is not specified, create it from merging
@@ -200,16 +203,25 @@
         CALL DEFINE_F_AGGREGATE_T_AXIS(nsets, member_sets,
      .           memb_filenames, axcalf, findices, axcalt,
      .           tmatch, t1indices, tdims, status)
-        IF (status .NE. ferr_ok) GOTO 5500
+        IF (status .NE. ferr_ok) GOTO 5200
 
-* TODO: deal with @LAG, if given on /FAXIS or /TAXIS (but not both)
+* Generate a lag axis, if requested (on /FAXIS or /TAXIS but not both)
+        IF ( (INDEX(fmatch, '@LAG') .GT. 0) .OR.
+     .       (INDEX(tmatch, '@LAG') .GT. 0) ) THEN
+           CALL DEFINE_LAG_AXIS(nsets, member_sets, memb_filenames,
+     .                   fmatch, findices, tmatch, t1indices, tdims,
+     .                   axcalf, axcalt, axlagf, axlagt, status)
+           IF (status .NE. ferr_ok) GOTO 5200
+        ENDIF
+
+* TODO: handle defining variables using the lag axis
 
 * Create forecast datasets corresponding to the given forecast dataset
 * except defined for the full forecasted time axis axcalt.  Do this by
 * create "multifile" netCDF ("MC") T-aggregated datasets for axcalt but
 * with only the single file to the appropriate section of the time axis.
         CALL DEFINE_F_AGG_T_MC_DSETS(nsets, member_sets,
-     .          memb_filenames, axcalt, t1indices, tdims, status)
+     .         memb_filenames, axcalt, t1indices, tdims, status)
 
 
 * Find a number for the aggregate data set
@@ -218,7 +230,7 @@
            agg_dset = agg_dset + 1
            IF ( agg_dset .GT. maxdsets )
      .        CALL ERRMSG(ferr_aggregate_error, status,
-     .             'No slots available for aggregate dataset', *5500)
+     .             'No slots available for aggregate dataset', *5200)
         ENDDO
 
 * 1st member dset sets pattern for all to follow
@@ -341,11 +353,21 @@
  5000   CALL TM_PURGE_TMP_GRIDS(ignored)
         CALL TM_CLOSE_SET_COND_DEALLO(agg_dset, .FALSE., ignored)
         agg_dset = unspecified_int4
-        IF ( (tline .LE. 0) .AND. (axcalt .GT. 0) ) THEN
+
+* remove any synthesized axes
+ 5200   IF ( axlagt .GE. 0 ) THEN
+           CALL FREE_LINE_DYNMEM(axlagt)
+           CALL TM_DEALLO_DYN_LINE(axlagt)
+        ENDIF
+        IF ( axlagf .GE. 0 ) THEN
+           CALL FREE_LINE_DYNMEM(axlagf)
+           CALL TM_DEALLO_DYN_LINE(axlagf)
+        ENDIF
+        IF ( (tline .LT. 0) .AND. (axcalt .GE. 0) ) THEN
            CALL FREE_LINE_DYNMEM(axcalt)
            CALL TM_DEALLO_DYN_LINE(axcalt)
         ENDIF
-        IF ( (fline .LE. 0) .AND. (axcalf .GT. 0) ) THEN
+        IF ( (fline .LT. 0) .AND. (axcalf .GE. 0) ) THEN
            CALL FREE_LINE_DYNMEM(axcalf)
            CALL TM_DEALLO_DYN_LINE(axcalf)
         ENDIF
