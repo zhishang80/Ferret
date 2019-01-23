@@ -39,7 +39,7 @@
 * NOAA/PMEL, Seattle, WA - Tropical Modeling and Analysis Program
 
 * V510 *sh*
-* $Id$ 
+* $Id: transfer_cx_axis_to_uv.F 25840 2018-12-14 19:48:29Z ansley $ 
 *       *acm* 3/12 6D Ferret (common uses nferdims in tmap_dims.parm)
 
         IMPLICIT NONE

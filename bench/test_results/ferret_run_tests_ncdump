@@ -1426,23 +1426,23 @@ netcdf a {
 dimensions:
 	AX002 = 5 ;
 variables:
-	double AX002(AX###) ;
+	double AX002(AX002) ;
 		AX002:point_spacing = "even" ;
 		AX002:axis = "X" ;
-	double A1(AX###) ;
-		A1:missing_value = -1.e+34 ;
-		A1:_FillValue = -1.e+34 ;
+	float A1(AX002) ;
+		A1:missing_value = -1.e+34f ;
+		A1:_FillValue = -1.e+34f ;
 		A1:long_name = "a1" ;
 		A1:three = 1.f, 2.f, 3.f ;
 		A1:history = "From EZ.DAT" ;
-	double A2(AX###) ;
-		A2:missing_value = -1.e+34 ;
-		A2:_FillValue = -1.e+34 ;
+	float A2(AX002) ;
+		A2:missing_value = -1.e+34f ;
+		A2:_FillValue = -1.e+34f ;
 		A2:long_name = "a2" ;
 		A2:history = "From EZ.DAT" ;
-	double A3(AX###) ;
-		A3:missing_value = -1.e+34 ;
-		A3:_FillValue = -1.e+34 ;
+	float A3(AX002) ;
+		A3:missing_value = -1.e+34f ;
+		A3:_FillValue = -1.e+34f ;
 		A3:long_name = "a3" ;
 		A3:history = "From EZ.DAT" ;
 
@@ -1464,18 +1464,18 @@ netcdf a {
 dimensions:
 	AX012 = 5 ;
 variables:
-	double AX012(AX###) ;
+	double AX012(AX012) ;
 		AX012:point_spacing = "even" ;
 		AX012:axis = "X" ;
-	double V1(AX###) ;
-		V1:missing_value = -1.e+34 ;
-		V1:_FillValue = -1.e+34 ;
+	float V1(AX012) ;
+		V1:missing_value = -1.e+34f ;
+		V1:_FillValue = -1.e+34f ;
 		V1:long_name = "V1" ;
 		V1:strval = "2" ;
 		V1:history = "From EZ.DAT" ;
-	double V4(AX###) ;
-		V4:missing_value = -1.e+34 ;
-		V4:_FillValue = -1.e+34 ;
+	float V4(AX012) ;
+		V4:missing_value = -1.e+34f ;
+		V4:_FillValue = -1.e+34f ;
 		V4:long_name = "V4" ;
 		V4:history = "From EZ.DAT" ;
 
@@ -2514,12 +2514,12 @@ netcdf a {
 dimensions:
 	AX002 = 3 ;
 variables:
-	double AX002(AX###) ;
+	double AX002(AX002) ;
 		AX002:point_spacing = "even" ;
 		AX002:axis = "X" ;
-	double MY_ASC(AX###) ;
-		MY_ASC:missing_value = 3. ;
-		MY_ASC:_FillValue = 3. ;
+	float MY_ASC(AX002) ;
+		MY_ASC:missing_value = 3.f ;
+		MY_ASC:_FillValue = 3.f ;
 		MY_ASC:long_name = "chlorophyll" ;
 		MY_ASC:units = "micrograms/L" ;
 		MY_ASC:history = "From dat.dat" ;
@@ -2532,12 +2532,12 @@ netcdf a {
 dimensions:
 	AX002 = 3 ;
 variables:
-	double AX002(AX###) ;
+	double AX002(AX002) ;
 		AX002:point_spacing = "even" ;
 		AX002:axis = "X" ;
-	double MY_UNF(AX###) ;
-		MY_UNF:missing_value = 5. ;
-		MY_UNF:_FillValue = 5. ;
+	float MY_UNF(AX002) ;
+		MY_UNF:missing_value = 5.f ;
+		MY_UNF:_FillValue = 5.f ;
 		MY_UNF:long_name = "Some Unformatted input" ;
 		MY_UNF:units = "metres" ;
 		MY_UNF:history = "From unf.dat" ;
@@ -3085,11 +3085,6 @@ variables:
 *** Running ferret script: bn_dot_product.jnl
 *** Running ferret script: bn_cache_management.jnl
 *** Running ferret script: bn_transp_choose.jnl
-*** Running ferret script: bn_iin_regrid.jnl
-*** Running ferret script: bn721_bug_fixes.jnl
-*** Running ferret script: bn722_bug_fixes.jnl
-*** Running ferret script: bn_tseries_modulo.jnl
-*** Running ferret script: bn_huge_axis.jnl
 *** Running ferret script: bn_save_as_global.jnl
 *** Running ferret script: bn74_bug_fixes.jnl
 *** Running ferret script: bn_clim_special.jnl

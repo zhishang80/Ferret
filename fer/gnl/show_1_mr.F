@@ -61,6 +61,7 @@
 *		  Adjust output to 6-D or 4-D grids
 * V702 *sh* 2/17  Reveal dynamic memory instead of block memory
 *		  Increase field widths for long axes
+* V720 *sh* 4/17  customize output to show a DSG mr
 
         IMPLICIT NONE
 	include	'tmap_dims.parm'
@@ -82,9 +83,9 @@
 * V500 *kob* 3/99- up VAR_CODE and vname decl's to 64 chars
 * V552 *acm* 4/03- up VAR_CODE and vname decl's from 64 to 128 chars
 * local variable declarations:
-	LOGICAL	ITS_UN_CACHED, FOUR_D_GRID
-	INTEGER TM_LENSTR1, MR_DIM_LEN,
-     .		idim, ndim, mrlen, mrsizelen, dset, listdims
+	LOGICAL	ITS_UN_CACHED, FOUR_D_GRID, TM_ITSA_DSG
+	INTEGER TM_LENSTR1, MR_DIM_LEN, TM_DSG_DSET_FROM_GRID,
+     .		idim, ndim, mrlen, mrsizelen, dset, listdims, grid
 	CHARACTER VAR_CODE*128, ALG_TRANS_CODE*3, ARG_STRING*12, TM_FMT*8,
      .		  protection*4, shape*4, dname*14, gname*12, vname*128,
      .		  ww_lo(nferdims)*20, ww_hi(nferdims)*20, 
@@ -92,12 +93,18 @@
      .		  mrbuf*4, mrsizebuf*8,
      .		  cache_stat*8
 
-* If mode 6d_lab has been canceled, we will list only the first 4 dimensions.
+! DSGTBD Use dsg_xlate_grid wherever TRANSLATE_TO_WORLD is called in Ferret
+* Get the grid to be use for formatting output
+	grid = mr_grid(mr)
+	IF (TM_ITSA_DSG(grid)) THEN
+	   dset = TM_DSG_DSET_FROM_GRID(grid)
+	   grid = dsg_xlate_grid(dset)
+	ENDIF
 
+* If mode 6d_lab has been canceled, we will list only the first 4 dimensions.
 	listdims = nferdims
 	IF ( .NOT. mode_6d_lab) listdims = 4
 	status = ferr_ok
-
 	IF ( FOUR_D_GRID(mr_grid(mr)) ) listdims = 4
 
 * get shape
@@ -124,10 +131,10 @@
 	      ww_hi(idim) = ' ...'
 	   ELSE
 	      CALL TRANSLATE_TO_WORLD
-     .	           ( mr_lo_ww(idim,mr),idim,mr_grid(mr),
+     .	           ( mr_lo_ww(idim,mr),idim,grid,
      .		     ax_dec_pt(idim), ww_lo(idim) )
 	      CALL TRANSLATE_TO_WORLD
-     .	           ( mr_hi_ww(idim,mr),idim,mr_grid(mr),
+     .	           ( mr_hi_ww(idim,mr),idim,grid,
      .		     ax_dec_pt(idim), ww_hi(idim) )
 	   ENDIF
 	   IF ( mr_lo_ss(mr,idim) .EQ. unspecified_int4 ) THEN

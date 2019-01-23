@@ -253,8 +253,6 @@ c        ENDIF
      .                do_warn, vname(:vlen), maxlen, attlen,
      .                attoutflag, buff,  ds_bad_flag(ivtm))
              ENDIF
-
-
 	     
 	     CALL CD_GET_VAR_ATT_ID (dset, ivcd, '_FillValue', 
      .                  attid, istat)
@@ -337,6 +335,15 @@ c        ENDIF
 		IF (do_warn .AND. tmap_diag_on) CALL WARN(
      .'No missing_value or _FillValue attribute. Using NaN for variable: ' 
      . //vname(:vlen)) 
+! DSGTBD: no warning message needed on essential DSG instance vars
+!  -- coord vars, rowSize or ID -- as these are not allowed to have missing
+!     values (really need to be so strict?)  Instead a warning should be 
+!     issued if they are found to have missing value gaps. ...
+
+
+! DSGTBD: Perhaps the obs mask is initialized with a mask based on valid values of
+!  the appropriate lon, lat, time, depth coordinates which are in the obs direction
+
 
              ENDIF
 

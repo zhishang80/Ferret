@@ -126,6 +126,7 @@
 * V73+ *acm* 12/17 Fix issue #1847 - value overflows integer on RETURN=size
 * V74  *acm* 2/18 Issue # 1861, handling missing- and _FillValue with scale and offset
 *                 change to `var,RETURN=bad`
+* V74+ *acm*10/10 Partial fix to working with E contexts in dsg datasets.
 * v745 *acm* 12/18  Issue 1909, option to write dates in ISO8601 format
 * v7441*acm* 12/18 Issue 1910: Allow dates in commands to be in ISO 8601 form, yyyy-mm-dd
 
@@ -154,7 +155,8 @@
 	PARAMETER (max_len = 2048)
 
 * internal variable declarations:
-	LOGICAL   TM_HAS_STRING, TM_DFPEQ, need_formatting, zero_fill, coordvar,
+	LOGICAL   TM_HAS_STRING, TM_DFPEQ, TM_ITSA_DSG, 
+     .		  need_formatting, zero_fill, coordvar,
      .            do_err, do_eval, get_ready, was_dep, const_arr_var,
      .		  dqote, DQ, orig_name, user_prec, uvgrid, compressed
 	INTEGER   CGRID_SIZE, CGRID_AXIS, TM_LENSTR1, CX_DIM_LEN,
@@ -166,7 +168,7 @@
      .            vartype, ist, ind,
      .            attype, attlen, inxt, attoutflag, fertype, 
      .            attid, ieq, base_isp, base_cx, cat, var, uvar,  
-     .            i1ss, inss, grid, ucode
+     .            i1ss, inss, grid, ucode, siz
 	REAL	  result, val, aval
 	REAL*8 TM_WORLD, TM_WW_AXLEN, ww
 	CHARACTER TM_FMT*(max_len), TM_FMT_USER*(max_len), LEFINT*16, VAR_TITLE*(max_len),
@@ -1165,7 +1167,26 @@ c		    ENDIF
 	   mr = is_mr(1)
 
 * ... make sure the result is a single, valid value
-	   IF ( CGRID_SIZE(cx) .NE. 1 ) GOTO 5200	! result not a scalar
+	   IF ( CGRID_SIZE(cx) .NE. 1 ) THEN
+
+*    For DSG grids the requested region may be just in the WW context in E
+	      IF (CGRID_SIZE(cx).GT.1 .AND. 
+     .            TM_ITSA_DSG( cx_grid(cx) ) ) THEN  
+	         siz = 1
+	         DO idim = x_dim, t_dim
+	      	      siz = siz * (
+     .                 cx_hi_ss( cx, idim )  - cx_lo_ss( cx, idim ) + 1 )
+	         ENDDO
+	         siz = siz * ( 
+     .               cx_hi_ww( e_dim, cx ) - cx_lo_ww( e_dim, cx ) + 1 )
+	         siz = siz * ( 
+     .               cx_hi_ss( cx, f_dim ) - cx_lo_ss( cx, f_dim ) + 1 )
+	         IF (siz .NE. 1) GOTO 5200
+	      ELSE
+	         IF ( CGRID_SIZE(cx) .NE. 1 ) GOTO 5200	! result not a scalar
+	      ENDIF
+
+	   ENDIF
 
 * ... extract the result scalar from the (possibly larger) memory variable
 	   CALL CREATE_TEMP_MEM_VAR( cx, mr_temp, status )

@@ -44,7 +44,7 @@
 *
 * V67  *acm* 2/11 XML fixes. New attribute formatting, ![CDATA] escape, upper/lowercase handling.
 *       *acm* 3/12 Add E and F dimensions (use nferdims in tmap_dims.parm)
-
+* V74+ *acm* 10/18 routine minmax returns a new argument: count of valid data
 
         IMPLICIT NONE
 	include 'tmap_dims.parm'
@@ -94,7 +94,7 @@
      .			cleft, usable_line_len, max_fields, row_ax,
      .			col_ax, places, col_dec, row_dec, row_wld, 
      .			numbers, first, slen, llen, axis, lp, cal_id,
-     .                  wkblk, ndig(nferdims)
+     .                  wkblk, ndig(nferdims), nok
 	CHARACTER*255	VAR_TITLE, VAR_TITLE_MOD, PAREN_SURROUND, vname_buff
 * V500: *kob* 3/99 - up VAR_UNITS from 32 to 64 
 	CHARACTER	AX_TITLE*32, VAR_UNITS*64, LEFINT*8, TM_FMT*16,
@@ -651,8 +651,8 @@
 	   nleft = GET_MAX_C_STRING_LEN(mr_c_pointer(mr), MGRID_SIZE(mr))
 	   all_bad = .FALSE.
 	ELSE
-	   CALL MINMAX(grid_data, MGRID_SIZE(mr), bad_data, small, big)
-	   all_bad = small .EQ. arbitrary_large_val4
+	   CALL MINMAX(grid_data, MGRID_SIZE(mr), bad_data, small, big, nok)
+	   all_bad = nok .EQ. 0
 
 * . . . how many digits right and left of decimal point ?
  	   biggest = MAX( ABS( small ), big )

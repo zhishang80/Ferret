@@ -56,6 +56,7 @@
 * V702 2/17 *sh* add mode FRUGAL and spawn_status
 * v720 7/17 *acm* ticket 2552 Make SPAWN_STATUS return the return status, so 0=succcess
 *           SPAWN_STATUS returns the status value, used for SPAWN_OK and SPAWN_STATUS
+* v73+ 12/17 *acm* add flag grid_is_dsg, true when working on a dsg grid, plotting set of features
 * v743  12/18 *acm* Issue 1803, new parameter mode_set_always, for
 *                  New command-line switch -verify for set mode ver:always behavior
 * v745 *acm* 12/18  Issue 1909, option to write dates in ISO8601 format
@@ -186,7 +187,6 @@
      .          num_linecolors, spawn_status,
      .		date_fmt_out
 
-
 	LOGICAL
      .		list_format_given, list_unformatted, list_dsf, list_redirected,
      .		list_heading, list_append, list_tmap,
@@ -205,7 +205,8 @@
      .          allowed_err,
      .          one_cmnd_mode,
      .		mode_auto_curvi, mode_auto_curvi_last,
-     .		mode_auto_layerz, mode_auto_layerz_last
+     .		mode_auto_layerz, mode_auto_layerz_last,
+     .		grid_is_dsg
 
 
 ! Note: available_char_var is unused
@@ -264,6 +265,7 @@
      .		in_get_grid_mode, 
      .		mode_auto_curvi, mode_auto_curvi_last,
      .		mode_auto_layerz, mode_auto_layerz_last,
+     .		grid_is_dsg,
      .		frame_compress, available_char_var,
      .		journal_file, ppllist_file,
      .		xwind_node, xwind_node_len,

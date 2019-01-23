@@ -5,7 +5,7 @@ C  based on NCAR routine MINMAX, return minima
 C  From the NCAR graphics library at http://ngwww.ucar.edu version 4.2
 C  Modified by Ansley Manke to regurn only the minima for subroutine findlo.F
 C-------------------------------------------------------------
-C	$Id$
+C	$Id: minminmax.F 25840 2018-12-14 19:48:29Z ansley $
 C                                                                      
 C                Copyright (C)  2000
 C        University Corporation for Atmospheric Research

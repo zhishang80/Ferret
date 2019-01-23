@@ -43,7 +43,7 @@
 * written for VAX computer under VMS operating system
 *
 * V200:  5/31/89 - extracted from TRANSFER_CONTEXT
-* $Id$ 
+* $Id: transfer_axis.F 25840 2018-12-14 19:48:29Z ansley $ 
 *       - *kob* need to now copy cx_calender as well
 * v580 *acm* 11/04 transfer cx_cal_id, the calendar ID used when  
 *                  computing world coordinates

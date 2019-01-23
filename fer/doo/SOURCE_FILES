@@ -52,6 +52,7 @@ do_interpolate.F\
 do_lin_regrid.F\
 do_locate.F\
 do_max.F\
+do_max_dsg.F\
 do_max_sub.F\
 do_min.F\
 do_min_sub.F\
@@ -64,6 +65,8 @@ do_nearest_index_below.F\
 do_nearest_regrid.F\
 do_ngood.F\
 do_points.F\
+do_regrid_from_dsg.F\
+do_regrid_to_dsg.F\
 do_run_sum.F\
 do_run_sum_sub.F\
 do_shift.F\
@@ -88,6 +91,7 @@ do_window_regrid.F\
 do_xact_regrid.F\
 do_xyave_regrid.F\
 do_xylin_regrid.F\
+dsg_convolve.F\
 finalize_ave_int.F\
 finalize_sums_counts.F\
 finalize_variance.F\

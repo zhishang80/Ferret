@@ -211,9 +211,10 @@
      .                  attname*128, show_str*512, buff2*3, DUMMY*512
 
 * local parameter declarations:
-	INTEGER		slash_del_temp, slash_del_perm
+	INTEGER		slash_del_temp, slash_del_perm, slash_can_dat_fmask
 	PARAMETER     ( slash_del_temp = 1+1,
-     .			slash_del_perm = 2+1 )
+     .			slash_del_perm = 2+1,
+     .			slash_can_dat_fmask = 3 )
 
 * command given with /ALL ?
 	slash_all = .FALSE.
@@ -344,6 +345,7 @@
 
 * CANCEL DATA_SET data_set_number1,number2,...
  700	report_error = qual_given(slash_canc_data_noerr) .LE. 0      ! 5/93
+
  	IF ( num_items .GT. 0 ) THEN
 	   DO 710 item = 1, num_items
 	      buff = cmnd_buff(item_start(item):item_end(item))
@@ -393,9 +395,30 @@
 	         ENDIF
 	      ENDIF
 
+ 705	CONTINUE
+
+** CANCEL DATA/FMASK
+* This does not cancel the dataset, just the FMASK property
+* deallocate line memory if a mask-by-feature variables was used.
+* 
+	      IF (qual_given(slash_can_dat_fmask) .GT. 0) THEN
+	         IF (dsg_msk_lm(iset) .NE. unspecified_int4) THEN
+	            CALL FREE_LINE_DYNMEM( dsg_msk_lm )
+	            CALL TM_DEALLO_DYN_LINE( dsg_msk_lm )
+	            dsg_msk_lm(iset) = unspecified_int4
+
+		    varid = 0
+		    attname = '__feature_mask_'
+		    CALL CD_DELETE_ATTRIBUTE (iset, varid, attname, status )
+
+	         ENDIF
+	         GOTO 790 
+	      ENDIF
+
+*  ... Cancel data set(s)
 *  ... this may also cancel parent aggregations that use this dataset
 *      and if an aggregation, hidden agg members 
- 705	      CALL CANCEL_DATA_SET( iset, status )  
+	      CALL CANCEL_DATA_SET( iset, status )  
 
  710	   CONTINUE
 * ... if only one set remains then point to it

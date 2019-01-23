@@ -31,5 +31,4 @@ if ($1"0|*>1") then
   message/error/continue Starting test: $1 
   message/continue Starting test: $1
 endif
-
 set mode/last verify

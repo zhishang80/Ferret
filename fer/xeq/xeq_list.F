@@ -159,11 +159,13 @@
 *                  bounds attribute.
 * v730 11/2017 *acm* new SAVE/ASGLOBAL to write a global attribute, see ticket 2060, issue 1332
 * V740  3/2018 *acm* issue 1863: LIST/APPEND w/o /FORM=cdf to a netCDF file is an error
+* vxx 4/17 *sh* list DSG variables
 * V743 12/2018 *acm* issue 1907: LIST/CLOBBER/FORM=stream didn't clobber the file
 
         IMPLICIT NONE
 	include 'tmap_dims.parm'
         include 'tmap_errors.parm'
+        include 'implicit.parm'
 	include	'ferret.parm'
 	include	'slash.parm'
 	include 'errmsg.parm'
@@ -178,8 +180,8 @@
 * calling argument declarations:
 
 * local variable declarations
-	LOGICAL		is_secure
-	LOGICAL		ITS_AUTO_CURVI,
+	LOGICAL		is_secure, has_dsg
+	LOGICAL		ITS_AUTO_CURVI, TM_ITSA_DSG_RAGGED,
      .			normal_file, fexist, heading, list_to_tty, do_multi,
      .			do_epic, do_cdf, do_unform, do_stream,
      .			do_comma_del, do_tab_del, do_dods, do_xml,
@@ -188,15 +190,19 @@
      .			do_shrink, as_global
 
 	INTEGER		TM_LENSTR1, CX_DIM_LEN, STR_CASE_BLIND_COMPARE,
-     .                  STR_UPCASE, GET_MAX_STRING_LEN, NF_CLOSE, 
+     .                  STR_UPCASE, GET_MAX_STRING_LEN, DSG_WHATS_IT,
+     .			TM_DSG_DSET_FROM_GRID, TM_DSG_NFEATURES,NF_CLOSE, 
      .			status, mr, cx, inext, ilist, wsize, vax_code,
      .			rlen, flen, reclen, i, cx1, qfile, idim,
-     .			ndim, perm(7), mr_perm(max_intrp),
+     .			ndim, dims(nferdims), perm(7), mr_perm(max_intrp),
      .                  npermuted, recsofar, do_stream_phase, nvars,
      .                  edges_flag, keepax_flag, nn, slen, do_bounds,
      .			my_mr(max_intrp), my_cx(max_intrp), frame_bottom,
-     .			nvars2list, nctype, cdfid
+     .			nvars2list, grid, dsg_type, dset, nfeatures, var,
+     .			longest_feature, nctype, cdfid
+
 	INTEGER*8	i8_size
+	REAL		big_val, little_val
 
 	CHARACTER	AUTO_FILENAME*2048, filename*2048, raw_name*2048, 
      .			buff*2048, fstatus*8, faccess*12, fformatted*12,
@@ -367,6 +373,11 @@ c     .		 .AND. .NOT.do_comma_del
 	   inext = inext + 1
 	   my_mr(inext) = is_mr(i)
 	   my_cx(inext) = is_cx(i)
+* NOTE: (4/17)  THIS APPROACH TO MAKING AUXILIARY VARIABLES ACCESSIBLE
+*     -- CAREFULLY PUTTING THEM ONTO THE STACK -- CAN BE REPLACED BY A MUCH
+*     SIMPLER APPROACH.  PRE-LOAD AUX VARS INTO MR MEMORY AND KEEP TRACK OF
+*     THEM AS PART OF THE DATASET DEFINITION.  (FOR AUXILIARY VARIABLES
+*     THAT ARE THEMSELVES UVARS THIS WILL NEED SOME ADDITIONAL THOUGHT) 
 * ... now put its aux vars into the list
 	   IF ( ITS_AUTO_CURVI(i,curvi_axes) ) THEN
 * TEMPORARY: need to ensure that 'coordinates' attributes are written to point
@@ -691,6 +702,32 @@ c	   IF (.NOT.permute) CALL GET_CX_DIMS(cx,ndim, perm )
            npermuted = npermuted + 1
 	ENDIF
 
+* is this a listing of DSG variables
+* DSGTBD:  Is there a use case for treating DSG instance variables as 1D grids?
+	has_dsg = .FALSE.
+	DO ilist = 1, nvars2list
+	   cx = my_cx(ilist)
+	   grid = cx_grid(cx)
+	   IF (DSG_WHATS_IT(grid) .NE. pdsg_not_dsg) THEN 
+	      dset = TM_DSG_DSET_FROM_GRID( grid )
+	      nfeatures = TM_DSG_NFEATURES( grid )
+	      CALL DSG_COORD_LIMS(dset, pdsg_row_size, little_val, big_val)
+	      longest_feature = big_val
+	      has_dsg = .TRUE.
+	      EXIT
+	   ENDIF
+	ENDDO
+
+* DSG data and gridded data cannot be mixed in the same listing
+* nor can DSG's from different datasets -- essentially separate reference 
+* coordinate systems.
+	IF (has_dsg) THEN
+! DSGTBD Need routine CHECK_CONSISTENT_DSG ensuring vars can be listed together
+! and error out if so
+! Separate routine suggested if SAVE has simimlar needs
+	   CONTINUE
+	ENDIF
+
 * list it
 !jli: for list in xml
 	IF (do_xml) THEN
@@ -702,11 +739,44 @@ c	   IF (.NOT.permute) CALL GET_CX_DIMS(cx,ndim, perm )
 *     .                          clobber, raw_name, status)
 
 	ELSEIF ( do_cdf ) THEN
-	   CALL CDF_LIST(  raw_name( 1:TM_LENSTR1(raw_name)), 
+
+* If data from dsg, if clobber then set up the ragged-array DSG file, with
+* appropriate attributes and the ID, rowsize, coordinate variables.
+
+** DSGTBD: Can append more variables but cannot append more obs or features ***
+** If not clobber, make sure that any mask applied when the file was
+** written matches the masking  in the file. Write the variable(s)
+** For now only allow CLOBBER
+
+	   IF (as_global) has_dsg = .FALSE.
+
+c	   IF (has_dsg) THEN
+c
+c	      IF (.NOT.clobber) GOTO 5200 
+c	      CALL CDF_LIST_DSG( dset,  my_cx, my_mr, nvars2list, nfeatures,
+c     .                    longest_feature, 
+c     .                    raw_name( 1:TM_LENSTR1(raw_name)), 
+c     .                    list_at_eof, nvars2list,
+c     .			  mr_perm, my_cx, buff, clobber,
+c     .                    out_type, quiet, status )
+c
+c	   ELSE
+	      CALL CDF_LIST(  raw_name( 1:TM_LENSTR1(raw_name)), 
      .                    list_at_eof, cdf_recax, nvars2list,
      .			  mr_perm, my_cx, buff, head_enh,
      .			  pcdf_mode_normal, clobber, edges_flag, do_bounds,
      .                    keepax_flag, out_type, quiet, as_global, status )
+c	   ENDIF
+
+* ASCII custom output for dsg-file data
+	ELSEIF ( has_dsg ) THEN
+! DSGTBD - make sure permutation cannot get applied??
+	   CALL LIST_DSG_DATA(dset,
+     .			      my_cx,
+     .			      my_mr,
+     .			      nvars2list,
+     .			      nfeatures,
+     .			      longest_feature )
 
 	ELSEIF( all_at_once ) THEN
 	   CALL LIST_MULTI(  mr_perm, my_cx, heading, perm,
@@ -776,9 +846,13 @@ c	   IF (.NOT.permute) CALL GET_CX_DIMS(cx,ndim, perm )
  5100	CALL ERRMSG( ferr_invalid_command, status,
      .		'Unrecognized option/'//
      .          cmnd_buff(qual_start(i):qual_end(i)) //pCR//
-     .		' Valid options are /OUTTYPE=DOUBLE,FLOAT,INT,SHORT,or BYTE', *1000 )
+     .		' Valid options are /OUTTYPE=DOUBLE,FLOAT,INT,SHORT,or BYTE',
+     .		 *1000 )
+
  5110	CALL ERRMSG( ferr_invalid_command, status,
      .			'/LIST/APPEND to netCDF file requires /FORMAT=cdf', *1000 )
+ 5200	CALL ERRMSG( ferr_invalid_command, status,
+     .   '/LIST/APPEND to netCDF ragged-array DSG file not implemented', *1000 )
 	END
 
 

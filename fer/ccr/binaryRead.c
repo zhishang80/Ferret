@@ -2,7 +2,7 @@
  *
  * Utility functions for reading binary data
  *
- * $Id$
+ * $Id: binaryRead.c 24279 2017-10-03 00:30:31Z ansley $
  *
  *
  * *kob*  4/06 v600 - changes for 64-bit build 

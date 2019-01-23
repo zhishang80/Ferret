@@ -1157,13 +1157,18 @@ GO bn_tseries_modulo
 GO bn_reset bn_huge_axis
 GO bn_huge_axis
 
+
 GO bn_reset bn_save_as_global
 GO bn_save_as_global
 
 
 ! *********** v7.4 Additions ***********
-go bn_reset bn74_bug_fixes
+GO bn_reset bn74_bug_fixes
 GO bn74_bug_fixes
+
+
+GO bn_reset bn_dsg_tseries
+GO bn_dsg_tseries
 
 GO bn_reset bn_clim_special
 GO bn_clim_special
@@ -1186,8 +1191,12 @@ GO bn_A_I_format
 GO bn_reset bn_center_keylab
 GO bn_center_keylab
 
-! *********** v7.42 Additions ***********
+GO bn_reset bn_regrid_to_dsg
+GO bn_regrid_to_dsg
 
+! *********** v7.4+ Additions ***********
+
+! *********** v7.42 Additions ***********
 go bn_reset bn741_bug_fixes
 GO bn741_bug_fixes
 
@@ -1202,8 +1211,26 @@ GO bn_ens_promote_global
 go bn_reset bn743_bug_fixes
 GO bn743_bug_fixes
 
-go bn_reset bn_data_squared
+go bn_reset bn_dsg_traj_plot
+GO bn_dsg_traj_plot
+
+go bn_reset bn_regrid_from_dsg
+GO bn_regrid_from_dsg
+
+go bn_reset bn_dsg_use_feature
+GO bn_dsg_use_feature
+
+GO bn_reset bn_dsg_plot_timeseries
+GO bn_dsg_plot_timeseries
+
+GO bn_reset bn_data_squared
 GO bn_data_squared
+
+GO bn_reset bn_dsg_feature_mask
+GO bn_dsg_feature_mask
+
+GO bn_reset bn_dsg_repeat_m
+GO bn_dsg_repeat_m
 
 go bn_reset bn_overlay_graticules
 GO bn_overlay_graticules
